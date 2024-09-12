@@ -7,7 +7,7 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 from sklearn.model_selection import train_test_split
 
 # Load dataset (the dataset is already preprocessed as part of this challenge)
-url = 'https://github.com/Vinrungu/vincent-rungu/blob/main/your_notebook_name.ipynb'
+url = 'https://raw.githubusercontent.com/Vinrungu/vincent-rungu/main/spam.csv'
 
 df = pd.read_csv(url, encoding='latin-1')
 
