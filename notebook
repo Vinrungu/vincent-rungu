@@ -1,0 +1,59 @@
+# Import necessary libraries
+import pandas as pd
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from sklearn.model_selection import train_test_split
+
+# Load dataset (the dataset is already preprocessed as part of this challenge)
+url = 'https://raw.githubusercontent.com/amankharwal/Website-data/master/spam.csv'
+https://github.com/Vinrungu/vincent-rungu/blob/main/your_notebook_name.ipynb
+
+df = pd.read_csv(url, encoding='latin-1')
+
+# Drop unnecessary columns and keep only message and label
+df = df[['v1', 'v2']]
+df.columns = ['label', 'message']
+
+# Convert labels to binary (ham: 0, spam: 1)
+df['label'] = df['label'].map({'ham': 0, 'spam': 1})
+
+# Split the data into training and test sets
+train_messages, test_messages, train_labels, test_labels = train_test_split(df['message'], df['label'], test_size=0.2, random_state=42)
+
+# Tokenize and pad sequences
+tokenizer = Tokenizer(num_words=10000, oov_token='<OOV>')
+tokenizer.fit_on_texts(train_messages)
+train_sequences = tokenizer.texts_to_sequences(train_messages)
+train_padded = pad_sequences(train_sequences, maxlen=100)
+
+test_sequences = tokenizer.texts_to_sequences(test_messages)
+test_padded = pad_sequences(test_sequences, maxlen=100)
+
+# Build the Neural Network
+model = tf.keras.Sequential([
+    tf.keras.layers.Embedding(10000, 16, input_length=100),
+    tf.keras.layers.GlobalAveragePooling1D(),
+    tf.keras.layers.Dense(24, activation='relu'),
+    tf.keras.layers.Dense(1, activation='sigmoid')
+])
+
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+# Train the model
+history = model.fit(train_padded, train_labels, epochs=10, validation_data=(test_padded, test_labels), verbose=2)
+
+# Create a function to classify a new message
+def predict_message(message):
+    sequence = tokenizer.texts_to_sequences([message])
+    padded = pad_sequences(sequence, maxlen=100)
+    prediction = model.predict(padded)[0][0]
+    label = 'spam' if prediction > 0.5 else 'ham'
+    return [float(prediction), label]
+
+# Test the function
+test_message = "Congratulations! You've won a $1000 Walmart gift card. Click here to claim your prize."
+print(predict_message(test_message))
+
+# The final cell tests the model (provided in the project link)
